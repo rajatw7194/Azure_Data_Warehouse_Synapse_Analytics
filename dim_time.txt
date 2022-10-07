@@ -1,0 +1,25 @@
+CREATE TABLE dim_time
+WITH
+(
+    DISTRIBUTION = HASH (time_key),
+    CLUSTERED COLUMNSTORE INDEX
+)
+AS
+SELECT
+    CAST(CONCAT('8',FORMAT(CAST([trip_start_date] AS DATETIME2), 'HHmmss')) AS INTEGER) AS time_key,
+    CAST([trip_start_date] AS TIME) AS time,
+    DATEPART(hour, CAST([trip_start_date] AS TIME)) AS hour,
+    DATEPART(minute, CAST([trip_start_date] AS TIME)) as minute,
+    DATEPART(second, CAST([trip_start_date] AS TIME)) as second
+FROM
+    dbo.staging_trip
+UNION
+SELECT
+    CAST(CONCAT('8',FORMAT(CAST([trip_end_date] AS DATETIME2), 'HHmmss')) AS INTEGER) AS time_key,
+    CAST([trip_end_date] AS TIME) AS time,
+    DATEPART(hour, CAST([trip_end_date] AS TIME)) AS hour,
+    DATEPART(minute, CAST([trip_end_date] AS TIME)) as minute,
+    DATEPART(second, CAST([trip_end_date] AS TIME)) as second
+FROM
+    dbo.staging_trip
+GO

@@ -1,0 +1,16 @@
+CREATE TABLE dim_station
+WITH
+(
+    DISTRIBUTION = HASH (station_key),
+    CLUSTERED COLUMNSTORE INDEX
+)
+AS  SELECT 
+        ROW_NUMBER() OVER(ORDER BY [station_id],[station_name],[station_latitude],[sattion_longitude] ASC) AS station_key, 
+        [station_id],
+        [station_name]          AS name,
+        [station_latitude]      AS latitude,
+        [sattion_longitude]     AS longitude
+    FROM
+        dbo.staging_station;
+
+

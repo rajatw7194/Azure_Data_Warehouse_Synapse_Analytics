@@ -1,0 +1,27 @@
+CREATE TABLE fact_table_trip
+WITH
+(
+    DISTRIBUTION = HASH (trip_id),
+    CLUSTERED COLUMNSTORE INDEX
+)
+AS SELECT 
+    [trip_id],
+    startd.date_key                                     AS start_date_key,                                  
+    endd.date_key                                        AS end_date_key,
+    startt.time_key                                     AS start_time_key,                   
+    endt.time_key                                     AS end_time_key,     
+    starts.station_key                                     AS start_station_key,                    
+    ends.station_key                                     AS end_station_key,                          
+    dim_rider.rider_key,
+    DATEDIFF(second,(CAST(startd.date as DATETIME)+CAST(startt.time AS datetime)),(CAST(endd.date as DATETIME)+CAST(endt.time as DATETIME))) AS trip_duration,
+    DATEDIFF(year, dim_rider.birthday, startd.date) AS rider_age
+    
+FROM staging_trip
+JOIN dim_date startd ON CAST([staging_trip].[trip_start_date] AS DATE) = startd.date
+JOIN dim_date endd ON CAST([staging_trip].[trip_end_date] AS DATE) = endd.date
+JOIN dim_time startt ON CAST([staging_trip].[trip_start_date] AS TIME) = startt.time
+JOIN dim_time endt ON CAST([staging_trip].[trip_end_date] AS TIME) = endt.time
+JOIN dim_station starts ON [staging_trip].[trip_start_station_id] = starts.station_id
+JOIN dim_station ends ON [staging_trip].[trip_end_station_id] = ends.station_id
+JOIN dim_rider ON [staging_trip].[trip_rider_id] = dim_rider.rider_id
+

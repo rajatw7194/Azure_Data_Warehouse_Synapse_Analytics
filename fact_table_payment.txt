@@ -1,0 +1,15 @@
+CREATE TABLE fact_table_payment
+WITH
+(
+    DISTRIBUTION = HASH (payment_id),
+    CLUSTERED COLUMNSTORE INDEX
+)
+AS SELECT
+    [payment_id], 
+    [payment_date]               AS payment_date_key,
+    [payment_account_number]    AS rider_id,
+    [payment_amount]            AS amount
+FROM staging_payment
+JOIN dim_date ON staging_payment.payment_date = dim_date.date
+JOIN dim_rider ON staging_payment.payment_account_number = dim_rider.rider_id
+GO

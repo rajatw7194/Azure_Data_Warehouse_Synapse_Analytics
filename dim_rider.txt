@@ -1,0 +1,16 @@
+CREATE TABLE dim_rider
+WITH
+(       
+    DISTRIBUTION = HASH(rider_key),
+    CLUSTERED COLUMNSTORE INDEX
+)    
+AS  SELECT 
+        ROW_NUMBER() OVER(ORDER BY [rider_id],[rider_first],[rider_last],[rider_address],[rider_birthday],[rider_member] ASC) AS rider_key, 
+        [rider_id],
+        [rider_first]       AS  firstname,
+        [rider_last]        AS  lastname,
+        [rider_birthday]    AS  birthday,
+        [rider_member]      AS  member,
+        [rider_address]     AS  address
+    FROM
+        dbo.staging_rider;

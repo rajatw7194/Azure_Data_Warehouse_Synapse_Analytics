@@ -1,0 +1,40 @@
+CREATE TABLE dim_date
+WITH
+(
+    DISTRIBUTION = HASH (date_key),
+    CLUSTERED COLUMNSTORE INDEX
+)
+AS  SELECT DISTINCT
+        CAST(FORMAT(CAST([trip_start_date] AS DATE), 'yyyyMMdd') AS INTEGER) AS date_key,
+        CAST([trip_start_date] AS DATE) AS date,
+        DATEPART(day,CAST([trip_start_date] AS DATE)) AS day,
+        DATEPART(weekday, CAST([trip_start_date] AS DATE)) AS dayweek,
+        DATEPART(month, CAST([trip_start_date] AS DATE)) AS month,
+        DATEPART(quarter, CAST([trip_start_date] AS DATE)) AS quarter,
+        DATEPART(year, CAST([trip_start_date] AS DATE)) AS year
+    FROM
+        dbo.staging_trip
+    UNION
+    SELECT DISTINCT
+        CAST(FORMAT(CAST([trip_end_date] AS DATE), 'yyyyMMdd') AS INTEGER) AS date_key,
+        CAST([trip_end_date] AS DATE) AS date,
+        DATEPART(day,CAST([trip_end_date] AS DATE)) AS day,
+        DATEPART(weekday, CAST([trip_end_date] AS DATE)) AS dayweek,
+        DATEPART(month, CAST([trip_end_date] AS DATE)) AS month,
+        DATEPART(quarter, CAST([trip_end_date] AS DATE)) AS quarter,
+        DATEPART(year, CAST([trip_end_date] AS DATE)) AS year
+
+    FROM
+        dbo.staging_trip
+    UNION
+     SELECT DISTINCT
+        CAST(FORMAT(CAST([payment_date] AS DATE), 'yyyyMMdd') AS INTEGER) AS date_key,
+        CAST([payment_date] AS DATE) AS date,
+        DATEPART(day,CAST([payment_date] AS DATE)) AS day,
+        DATEPART(weekday, CAST([payment_date] AS DATE)) AS dayweek,
+        DATEPART(month, CAST([payment_date] AS DATE)) AS month,
+        DATEPART(quarter, CAST([payment_date] AS DATE)) AS quarter,
+        DATEPART(year, CAST([payment_date] AS DATE)) AS year
+    FROM
+        dbo.staging_payment
+    

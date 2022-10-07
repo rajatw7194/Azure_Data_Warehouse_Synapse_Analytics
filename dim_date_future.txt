@@ -1,0 +1,31 @@
+CREATE TABLE dim_date (
+    ts datetime,
+    hour int,
+    dayofweek int,
+    dayofmonth int,
+    weekofyear int,
+    quarter int,
+    month int,
+    year int
+)
+
+DECLARE @startdate DATETIME
+DECLARE @cutoffdate DATETIME
+SET @startdate = (SELECT MIN(TRY_CONVERT(datetime, left(trip_start_date, 19))) FROM staging_trip)
+SET @cutoffdate = DATEADD(year, 3, (SELECT MAX(TRY_CONVERT(datetime, left(trip_start_date, 19))) FROM staging_trip))
+
+WHILE @startdate <= @cutoffdate
+      BEGIN
+            INSERT INTO [dim_date]
+            SELECT
+                   @startdate,
+                   DATEPART(HOUR, @startdate),
+                   DATEPART(WEEKDAY, @startdate),
+                   DATEPART(DAY, @startdate),
+                   DATEPART(WEEK, @startdate),
+                   DATEPART(QUARTER, @startdate),
+                   DATEPART(MONTH, @startdate),
+                   DATEPART(YEAR, @startdate)
+
+            SET @startdate = DATEADD(dd, 1, @startdate)
+      END
